@@ -2,6 +2,8 @@ from fastapi import Security, HTTPException, status, Request
 from fastapi.security.api_key import APIKeyHeader
 import os
 import dotenv
+import sqlalchemy
+from src import database as db
 
 dotenv.load_dotenv()
 DEMO_KEY = "demo-key"
