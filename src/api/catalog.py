@@ -13,6 +13,11 @@ def get_catalog():
 
     # Can return a max of 20 items.
 
+    with db.engine.begin() as connection:
+        result = connection.execute(sqlalchemy.text("SELECT * FROM students"))
+        for row in result:
+            print(row)
+
     return [
             {
                 "sku": "RED_POTION_0",
