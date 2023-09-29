@@ -46,4 +46,10 @@ class CartCheckout(BaseModel):
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
 
-    return {"total_potions_bought": 1, "total_gold_paid": 50}
+    with db.engine.begin() as connection:
+        result = connection.execute(sqlalchemy.text("SELECT num_red_potions FROM global_inventory"))
+    
+    num_potions = result.first()[0]
+
+    return {"total_potions_bought": 1 if num_potions > 0 else 0, 
+            "total_gold_paid": 50 if num_potions > 0 else 0}
