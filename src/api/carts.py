@@ -68,5 +68,5 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
         result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_ml = " + num_red_potions))
 
 
-    return {"total_potions_bought": 1 if num_potions > 0 else 0, 
-            "total_gold_paid": 50 if num_potions > 0 else 0}
+    return {"total_potions_bought": 1, 
+            "total_gold_paid": 50}
