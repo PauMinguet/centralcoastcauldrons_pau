@@ -24,6 +24,21 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
     """ """
     print(barrels_delivered)
 
+    if len(barrels_delivered) == 0:
+        return "OK"
+    
+    purchase_price = barrels_delivered[0].price
+
+    with db.engine.begin() as connection:
+        result = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory"))
+    gold = result.first()[0]
+    
+    final_gold = gold - purchase_price
+
+    with db.engine.begin() as connection:
+        result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = " + final_gold))
+
+
     return "OK"
 
 # Gets called once a day
@@ -31,9 +46,6 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     """ """
     print(wholesale_catalog)
-
-    #with db.engine.begin() as connection:
-    #    result = connection.execute(sqlalchemy.text(sql_to_execute))
 
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text("SELECT num_red_potions FROM global_inventory"))

@@ -36,6 +36,7 @@ class CartItem(BaseModel):
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
 
+
     return "OK"
 
 
@@ -47,9 +48,25 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
 
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT num_red_potions FROM global_inventory"))
+        result = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory"))
+    gold = result.first()[0]
+
+    gold += 50
     
-    num_potions = result.first()[0]
+    with db.engine.begin() as connection:
+        result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = " + gold))
+
+
+
+    with db.engine.begin() as connection:
+        result = connection.execute(sqlalchemy.text("SELECT num_red_potions FROM global_inventory"))
+    num_red_potions = result.first()[0]
+
+    num_red_potions -= 1
+
+    with db.engine.begin() as connection:
+        result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_ml = " + num_red_potions))
+
 
     return {"total_potions_bought": 1 if num_potions > 0 else 0, 
             "total_gold_paid": 50 if num_potions > 0 else 0}
