@@ -4,7 +4,9 @@ from sqlalchemy import create_engine
 import sqlalchemy
 
 def database_connection_url():
-    dotenv.load_dotenv()
+    if dotenv.load_dotenv() == False:
+        dotenv.load_dotenv(dotenv_path="password.env")
+
 
     return os.environ.get("POSTGRES_URI")
 
