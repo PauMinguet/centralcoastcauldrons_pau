@@ -26,9 +26,10 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
     
 
     if len(barrels_delivered) == 0:
-        return "OK"
+        return "Nothing Delivered"
     
     purchase_price = barrels_delivered[0].price
+    ml_in_barrel = barrels_delivered[0].ml_per_barrel
 
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory"))
@@ -38,6 +39,17 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
 
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = " + str(final_gold)))
+
+
+
+    with db.engine.begin() as connection:
+        result = connection.execute(sqlalchemy.text("SELECT num_red_ml FROM global_inventory"))
+    red_ml = result.first()[0]
+    
+    final_red_ml = red_ml + ml_in_barrel
+
+    with db.engine.begin() as connection:
+        result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_ml = " + str(final_red_ml)))
 
 
     return "OK"
@@ -52,6 +64,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         result = connection.execute(sqlalchemy.text("SELECT num_red_potions FROM global_inventory"))
     
     pots = result.first()[0]
+    print(pots)
 
     return [
         {

@@ -24,7 +24,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
 
     for i in range(len(potions_delivered)):
         if potions_delivered[i].potion_type == [100, 0, 0, 0]:
-            num_red_potions_delivered += 1
+            num_red_potions_delivered += potions_delivered[i].quantity
 
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text("SELECT num_red_ml FROM global_inventory"))
@@ -34,6 +34,17 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
 
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_ml = " + str(red_ml_tosubtract)))
+
+
+    with db.engine.begin() as connection:
+        result = connection.execute(sqlalchemy.text("SELECT num_red_potions FROM global_inventory"))
+    num_red_potions = result.first()[0]
+
+    final_num_red_potions = num_red_potions + num_red_potions_delivered
+
+    with db.engine.begin() as connection:
+        result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_potions = " + str(final_num_red_potions)))
+
 
     return "OK"
 
