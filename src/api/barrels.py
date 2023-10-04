@@ -23,6 +23,7 @@ class Barrel(BaseModel):
 def post_deliver_barrels(barrels_delivered: list[Barrel]):
     """ """
     print(barrels_delivered)
+    
 
     if len(barrels_delivered) == 0:
         return "OK"
@@ -36,7 +37,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
     final_gold = gold - purchase_price
 
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = " + final_gold))
+        result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = " + str(final_gold)))
 
 
     return "OK"

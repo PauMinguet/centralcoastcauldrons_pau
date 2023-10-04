@@ -33,7 +33,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
     red_ml_tosubtract = ml - num_red_potions_delivered * 100
 
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_ml = " + red_ml_tosubtract))
+        result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_ml = " + str(red_ml_tosubtract)))
 
     return "OK"
 
@@ -54,6 +54,8 @@ def get_bottle_plan():
         result = connection.execute(sqlalchemy.text("SELECT num_red_ml FROM global_inventory"))
     
     ml = result.first()[0]
+
+    print(ml)
 
     num_red_potions_mix = ml // 100
 
