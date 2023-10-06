@@ -12,10 +12,18 @@ router = APIRouter(
 )
 
 @router.get("/inventory")
-def get_inventory():
+def get_inventory():                #   NOT UPDATED FOR 3 COLORS OR FOR NEW TABLES
     """ """
+
+    with db.engine.begin() as connection:
+        gold1 = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory"))
+        pots1 = connection.execute(sqlalchemy.text("SELECT num_red_potions FROM global_inventory"))
+        ml1 = connection.execute(sqlalchemy.text("SELECT num_ml FROM global_inventory"))
+    gold = gold1.first()[0]
+    pots = pots1.first()[0]
+    ml = ml1.first()[0]
     
-    return {"number_of_potions": 0, "ml_in_barrels": 0, "gold": 0}
+    return {"number_of_potions": pots, "ml_in_barrels": ml, "gold": gold}
 
 class Result(BaseModel):
     gold_match: bool

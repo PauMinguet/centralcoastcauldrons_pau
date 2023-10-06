@@ -30,7 +30,21 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
     
     purchase_price = barrels_delivered[0].price
     ml_in_barrel = barrels_delivered[0].ml_per_barrel
+    type = barrels_delivered[0].potion_type
+    
+    # FIND OUT COLOR OF BARREL
+    colorml = None
+    if type[0] == 1:
+        colorml = "redml"
+    elif type[1] == 1:
+        colorml = "greenml"
+    elif type[2] == 1:
+        colorml = "blueml"
+    elif type[3] == 1:
+        colorml = "tranml"
 
+
+    # UPDATE GOLD
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory"))
     gold = result.first()[0]
@@ -43,14 +57,12 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
 
 
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT num_red_ml FROM global_inventory"))
-    red_ml = result.first()[0]
+        ml_to_update = connection.execute(sqlalchemy.text("SELECT " + colorml + " FROM ml")).first()[0]
+    ml_to_update += ml_in_barrel
     
-    final_red_ml = red_ml + ml_in_barrel
 
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_ml = " + str(final_red_ml)))
-
+        result = connection.execute(sqlalchemy.text("UPDATE ml SET " + colorml + " = " + str(ml_to_update)))
 
     return "OK"
 
@@ -60,15 +72,60 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     """ """
     print(wholesale_catalog)
 
-    with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT num_red_potions FROM global_inventory"))
-    
-    pots = result.first()[0]
-    print(pots)
+    barrel_cart = []
 
-    return [
+    rgbt = [0,0,0,0]
+    with db.engine.begin() as connection:
+        inventory = connection.execute(sqlalchemy.text("SELECT * FROM catalog")).fetchall()
+    print(inventory)
+
+    with db.engine.begin() as connection:
+        gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).first()[0]
+
+                        # for now just buy one small barrel (much better value than the tiny ones) of the color that we 
+                        # have the least either in potions or in ml, since bottler will make the max amount of every color potion
+
+    if gold >= 100:
+
+        for item in (inventory):
+            rgbt[0] += item[1] * item[6]
+            rgbt[1] += item[2] * item[6]
+            rgbt[2] += item[3] * item[6]
+            rgbt[3] += item[4] * item[6]
+
+        with db.engine.begin() as connection:
+            ml = connection.execute(sqlalchemy.text("SELECT * FROM ml")).first()
+
+        for i in range(1, len(ml)-1):
+            rgbt[i] += ml[i+1]
+
+        min_ml = 1000000
+        min_col = 3
+        for i in range(3):
+            if rgbt[i] < min_ml:
+                min_ml = rgbt[i]
+                min_col = i
+        
+        if min_col == 0:
+            least = "RED"
+        elif min_col == 1:
+            least = "GREEN"
+        elif min_col == 2:
+            least = "BLUE"
+        else:
+            least = None
+
+        print(rgbt)
+        print(least)
+
+        if least != None:
+            barrel_cart.append(
         {
-            "sku": "SMALL_RED_BARREL",
-            "quantity": 1 if pots < 10 else 0,
-        }
-    ]
+            "sku": "SMALL_" + least + "_BARREL",
+            "quantity": 1,
+        })
+
+    
+    
+
+    return barrel_cart
