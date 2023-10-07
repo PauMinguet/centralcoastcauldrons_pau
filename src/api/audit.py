@@ -16,14 +16,22 @@ def get_inventory():                #   NOT UPDATED FOR 3 COLORS OR FOR NEW TABL
     """ """
 
     with db.engine.begin() as connection:
-        gold1 = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory"))
-        pots1 = connection.execute(sqlalchemy.text("SELECT num_red_potions FROM global_inventory"))
-        ml1 = connection.execute(sqlalchemy.text("SELECT num_ml FROM global_inventory"))
-    gold = gold1.first()[0]
-    pots = pots1.first()[0]
-    ml = ml1.first()[0]
+        gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).first()[0]
+        pots = connection.execute(sqlalchemy.text("SELECT * FROM catalog")).fetchall()
+        ml = connection.execute(sqlalchemy.text("SELECT * FROM ml")).first()[1:]
+
+    num_pots = 0
+    for pot in pots:
+        num_pots += pot[6]
     
-    return {"number_of_potions": pots, "ml_in_barrels": ml, "gold": gold}
+    num_ml = 0
+    for m in ml:
+        num_ml += m
+    
+    print(num_pots, num_ml, gold)
+    
+    
+    return {"number_of_potions": num_pots, "ml_in_barrels": num_ml, "gold": gold}
 
 class Result(BaseModel):
     gold_match: bool
