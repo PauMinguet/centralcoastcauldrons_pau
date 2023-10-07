@@ -85,19 +85,20 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                         # for now just buy one small barrel (much better value than the tiny ones) of the color that we 
                         # have the least either in potions or in ml, since bottler will make the max amount of every color potion
 
-    if gold >= 100:
 
-        for item in (inventory):
-            rgbt[0] += item[1] * item[6]
-            rgbt[1] += item[2] * item[6]
-            rgbt[2] += item[3] * item[6]
-            rgbt[3] += item[4] * item[6]
+    for item in (inventory):
+        rgbt[0] += item[1] * item[6]
+        rgbt[1] += item[2] * item[6]
+        rgbt[2] += item[3] * item[6]
+        rgbt[3] += item[4] * item[6]
 
-        with db.engine.begin() as connection:
-            ml = connection.execute(sqlalchemy.text("SELECT * FROM ml")).first()
+    with db.engine.begin() as connection:
+        ml = connection.execute(sqlalchemy.text("SELECT * FROM ml")).first()
 
-        for i in range(1, len(ml)-1):
-            rgbt[i] += ml[i+1]
+    for i in range(1, len(ml)-1):
+        rgbt[i] += ml[i+1]
+
+    while gold >= 120:
 
         min_ml = 1000000
         min_col = 3
@@ -108,15 +109,18 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         
         if min_col == 0:
             least = "RED"
+            rgbt[0] += 500
         elif min_col == 1:
             least = "GREEN"
+            rgbt[1] += 500
         elif min_col == 2:
             least = "BLUE"
+            rgbt[2] += 500
         else:
             least = None
 
-        print(rgbt)
-        print(least)
+        #print(rgbt)
+        #print(least)
 
         if least != None:
             barrel_cart.append(
@@ -124,6 +128,10 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             "sku": "SMALL_" + least + "_BARREL",
             "quantity": 1,
         })
+            
+        gold -= 120
+
+        
 
     
     
