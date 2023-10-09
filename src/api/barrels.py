@@ -110,12 +110,15 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         if min_col == 0:
             least = "RED"
             rgbt[0] += 500
+            gold -= 100
         elif min_col == 1:
             least = "GREEN"
             rgbt[1] += 500
+            gold -= 120
         elif min_col == 2:
             least = "BLUE"
             rgbt[2] += 500
+            gold -= 120
         else:
             least = None
 
@@ -128,11 +131,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             "sku": "SMALL_" + least + "_BARREL",
             "quantity": 1,
         })
-            
-        gold -= 120
-
-        
-
     
     
 
