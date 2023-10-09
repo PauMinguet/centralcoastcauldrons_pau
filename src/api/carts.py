@@ -85,7 +85,8 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
 
         with db.engine.begin() as connection:
             connection.execute(sqlalchemy.text("UPDATE catalog SET quantity = quantity - " + str(pot[7]) + " WHERE name = '" + pot[6] + "'"))
-            connection.execute(sqlalchemy.text("DELETE FROM cart_items WHERE sku = '" + str(pot[6]) + "'"))
+            #connection.execute(sqlalchemy.text("DELETE FROM cart_items WHERE sku = '" + str(pot[6]) + "'"))
+            
     
     with db.engine.begin() as connection:
             connection.execute(sqlalchemy.text("DELETE FROM carts WHERE id = " + str(cart_id) + ""))
