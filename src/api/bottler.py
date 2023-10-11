@@ -76,7 +76,6 @@ def get_bottle_plan():              # FROM ALL THE POTIONS I MANUALLY CREATED IN
     potions = sorted(potions, key=itemgetter(6))
     print(potions)
 
-    index_pot_0 = 0
     potions_to_mix = []
 
 
