@@ -98,6 +98,8 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     for i in range(1, len(ml)-1):
         rgbt[i] += ml[i+1]
 
+    barrel_order = [0,0,0]
+
     while gold >= 120:
 
         min_ml = 1000000
@@ -108,15 +110,15 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 min_col = i
         
         if min_col == 0:
-            least = "RED"
+            barrel_order[0] += 1
             rgbt[0] += 500
             gold -= 100
         elif min_col == 1:
-            least = "GREEN"
+            barrel_order[1] += 1
             rgbt[1] += 500
             gold -= 120
         elif min_col == 2:
-            least = "BLUE"
+            barrel_order[2] += 1
             rgbt[2] += 500
             gold -= 120
         else:
@@ -125,12 +127,14 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         #print(rgbt)
         #print(least)
 
-        if least != None:
-            barrel_cart.append(
-        {
-            "sku": "SMALL_" + least + "_BARREL",
-            "quantity": 1,
-        })
+
+    colors = ["RED", "GREEN", "BLUE"]
+    for i in range(len(barrel_order)):
+        if barrel_order[i] != 0:
+            barrel_cart.append({
+        "sku": "SMALL_" + colors[i] + "_BARREL",
+        "quantity": barrel_order[i],
+    })
     
     
 
