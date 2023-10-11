@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from src.api import auth
 import sqlalchemy
 from src import database as db
+from operator import itemgetter
 
 router = APIRouter(
     prefix="/bottler",
@@ -56,23 +57,65 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
 
     return "OK"
 
+
+
+
+
+
 # Gets called 4 times a day
 @router.post("/plan")
-def get_bottle_plan():
+def get_bottle_plan():              # FROM ALL THE POTIONS I MANUALLY CREATED IN CATALOG, MAKE
+                                    # IT SO THAT QUANTITY IS ALWAYS THE SAME FOR ALL
 
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT * FROM ml"))
+        potions = connection.execute(sqlalchemy.text("SELECT * FROM catalog")).fetchall()
+        ml = list(connection.execute(sqlalchemy.text("SELECT * FROM ml")).fetchall()[0][1:])
+        print(ml)
 
-    ml = result.first()[1:]
 
+    potions = sorted(potions, key=itemgetter(6))
+    print(potions)
+
+    index_pot_0 = 0
     potions_to_mix = []
 
-    for i in range(len(ml)):
-        if ml[i] > 100:
+
+    for i in range(len(potions)):
+        if potions[i][6] != potions[0][6]:
+            min_quantity = potions[i][6]
+            break
+
+    while potions != []:
+        temp_ml = ml
+        r, g, b, d = potions[0][1], potions[0][2], potions[0][3], potions[0][4]
+        quant = 0
+        while quant < min_quantity:
+            if temp_ml[0] >= r and temp_ml[1] >= g and temp_ml[2] >= b and temp_ml[3] >= d:
+                quant += 1
+                temp_ml[0] -= r
+                temp_ml[1] -= g
+                temp_ml[2] -= b
+                temp_ml[3] -= d
+            else:
+                break
+        
+        if quant != 0:
             potions_to_mix.append(
-            {
-                "potion_type": [100 if i==0 else 0, 100 if i==1 else 0, 100 if i==2 else 0, 100 if i==3 else 0],
-                "quantity": ml[i] // 100,
-            })
+                {
+                    "potion_type": [r, g, b, d],
+                    "quantity": quant,
+                })
+        
+        ml[0] -= r * quant
+        ml[1] -= g * quant
+        ml[2] -= b * quant
+        ml[3] -= d * quant
+
+
+        potions = potions[1:]
+        
+
+
+            
     
     return potions_to_mix
