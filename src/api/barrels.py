@@ -28,41 +28,34 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
     if len(barrels_delivered) == 0:
         return "Nothing Delivered"
     
-    purchase_price = barrels_delivered[0].price
-    ml_in_barrel = barrels_delivered[0].ml_per_barrel
-    type = barrels_delivered[0].potion_type
-    
-    # FIND OUT COLOR OF BARREL
-    colorml = None
-    if type[0] == 1:
-        colorml = "redml"
-    elif type[1] == 1:
-        colorml = "greenml"
-    elif type[2] == 1:
-        colorml = "blueml"
-    elif type[3] == 1:
-        colorml = "tranml"
+    for i in range(len(barrels_delivered)):
+
+        purchase_price = barrels_delivered[i].price
+        ml_in_barrel = barrels_delivered[i].ml_per_barrel
+        type = barrels_delivered[i].potion_type
+        
+        # FIND OUT COLOR OF BARREL
+        colorml = None
+        if type[0] == 1:
+            colorml = "redml"
+        elif type[1] == 1:
+            colorml = "greenml"
+        elif type[2] == 1:
+            colorml = "blueml"
+        elif type[3] == 1:
+            colorml = "tranml"
 
 
-    # UPDATE GOLD
-    with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory"))
-    gold = result.first()[0]
-    
-    final_gold = gold - purchase_price
+        # UPDATE GOLD
+        with db.engine.begin() as connection:
+            result = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory"))
+        gold = result.first()[0]
+        
+        final_gold = gold - purchase_price
 
-    with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = " + str(final_gold)))
-
-
-
-    with db.engine.begin() as connection:
-        ml_to_update = connection.execute(sqlalchemy.text("SELECT " + colorml + " FROM ml")).first()[0]
-    ml_to_update += ml_in_barrel
-    
-
-    with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("UPDATE ml SET " + colorml + " = " + str(ml_to_update)))
+        with db.engine.begin() as connection:
+            result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = " + str(final_gold)))
+            result = connection.execute(sqlalchemy.text("UPDATE ml SET " + colorml + " = " + colorml + " + " + str(ml_in_barrel)))
 
     return "OK"
 
@@ -99,6 +92,8 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         rgbt[i] += ml[i+1]
 
     barrel_order = [0,0,0]
+    small_prices = [100, 120, 120]
+    colors = ["RED", "GREEN", "BLUE"]
 
     while gold >= 120:
 
@@ -112,29 +107,29 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         if min_col == 0:
             barrel_order[0] += 1
             rgbt[0] += 500
-            gold -= 100
+            gold -= small_prices[0]
         elif min_col == 1:
             barrel_order[1] += 1
             rgbt[1] += 500
-            gold -= 120
+            gold -= small_prices[1]
         elif min_col == 2:
             barrel_order[2] += 1
             rgbt[2] += 500
-            gold -= 120
-        else:
-            least = None
+            gold -= small_prices[2]
 
         #print(rgbt)
         #print(least)
 
 
-    colors = ["RED", "GREEN", "BLUE"]
+    
     for i in range(len(barrel_order)):
         if barrel_order[i] != 0:
             barrel_cart.append({
         "sku": "SMALL_" + colors[i] + "_BARREL",
         "quantity": barrel_order[i],
     })
+    
+
     
     
 

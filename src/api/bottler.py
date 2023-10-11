@@ -59,14 +59,6 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
 # Gets called 4 times a day
 @router.post("/plan")
 def get_bottle_plan():
-    """
-    Go from barrel to bottle.
-    """
-    # Each bottle has a quantity of what proportion of red, blue, and
-    # green potion to add.
-    # Expressed in integers from 1 to 100 that must sum up to 100.
-
-    # Initial logic: bottle all barrels into red potions.
 
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text("SELECT * FROM ml"))
@@ -82,8 +74,5 @@ def get_bottle_plan():
                 "potion_type": [100 if i==0 else 0, 100 if i==1 else 0, 100 if i==2 else 0, 100 if i==3 else 0],
                 "quantity": ml[i] // 100,
             })
-
-
-
     
     return potions_to_mix
