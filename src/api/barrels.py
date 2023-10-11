@@ -43,7 +43,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
         elif type[2] == 1:
             colorml = "blueml"
         elif type[3] == 1:
-            colorml = "tranml"
+            colorml = "darkml"
 
 
         # UPDATE GOLD
@@ -54,8 +54,10 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
         final_gold = gold - purchase_price
 
         with db.engine.begin() as connection:
-            result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = " + str(final_gold)))
-            result = connection.execute(sqlalchemy.text("UPDATE ml SET " + colorml + " = " + colorml + " + " + str(ml_in_barrel)))
+            connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = " + str(final_gold)))
+            connection.execute(sqlalchemy.text("UPDATE ml SET " + colorml + " = " + colorml + " + " + str(ml_in_barrel)))
+            connection.execute(sqlalchemy.text("INSERT INTO barrel_orders (color, size, price) VALUES (" + colorml + ", " + str(ml_in_barrel) + " + " + str(purchase_price)))
+
 
     return "OK"
 
