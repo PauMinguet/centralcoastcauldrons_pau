@@ -53,7 +53,7 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
         fin_price = cur_price + price * cart_item.quantity
 
         connection.execute(sqlalchemy.text("UPDATE carts SET price = " + str(fin_price) + " WHERE id = " + str(cart_id)))
-        connection.execute(sqlalchemy.text("INSERT INTO cart_items (cart_id, r, g, b, t, sku, quantity, price) VALUES ("+str(cart_id)+", "+r+", "+g+", "+b+", "+t+", '"+item_sku+"', "+str(cart_item.quantity)+", " +str(price)+" RETURNING id")).first()[0]
+        connection.execute(sqlalchemy.text("INSERT INTO cart_items (cart_id, r, g, b, t, sku, quantity, price) VALUES ("+str(cart_id)+", "+r+", "+g+", "+b+", "+t+", '"+item_sku+"', "+str(cart_item.quantity)+", " +str(price)+") RETURNING id")).first()[0]
 
     return "OK"
 
