@@ -20,7 +20,12 @@ def create_cart(new_cart: NewCart):
     """ """
     
     with db.engine.begin() as connection:
-        new_customer_id = connection.execute(sqlalchemy.text("INSERT INTO customers (name) VALUES ('" + str(new_cart.customer) + "') RETURNING id")).first()[0]
+        customer = connection.execute(sqlalchemy.text("SELECT * FROM customers WHERE name = '" + str(new_cart.customer) + "'")).first()
+        print(customer)
+        if customer == None:
+            new_customer_id = connection.execute(sqlalchemy.text("INSERT INTO customers (name) VALUES ('" + str(new_cart.customer) + "') RETURNING id")).first()[0]
+        else:
+            new_customer_id = customer[0]
         new_cart_id = connection.execute(sqlalchemy.text("INSERT INTO carts (customer_id) VALUES (" + str(new_customer_id) + ") RETURNING id")).first()[0]
 
     return {"cart_id": new_cart_id}
