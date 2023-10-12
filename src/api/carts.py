@@ -90,10 +90,10 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     'customer_id': customer_id,
     'customer_name': customer_name,
     'item_name': pot[6],
-    'price_per_unit': pot[8],
+    'price': pot[8],
     'quantity': pot[7]
 }
-            connection.execute(sqlalchemy.text("INSERT INTO invoices (customer_id, customer_name, item_name, price_per_unit, quantity, created_at) VALUES (:customer_id, :customer_name, :item_name, :price_per_unit, :quantity, NOW())"), params)
+            connection.execute(sqlalchemy.text("INSERT INTO invoices (customer_id, customer_name, item_name, price, quantity, created_at) VALUES (:customer_id, :customer_name, :item_name, :price, :quantity, NOW())"), params)
 
             connection.execute(sqlalchemy.text("DELETE FROM cart_items WHERE sku = '" + str(pot[6]) + "'"))
             
