@@ -72,7 +72,7 @@ def get_bottle_plan():              # FROM ALL THE POTIONS I MANUALLY CREATED IN
         ml = list(connection.execute(sqlalchemy.text("SELECT * FROM ml")).fetchall()[0][1:])
         print(ml)
     
-    if ml[0] < 200 and ml[1] < 200 and ml[2] < 200:
+    if ml[0] < 100 or ml[1] < 100 or ml[2] < 100:
         return []
 
 
