@@ -104,6 +104,8 @@ def get_bottle_plan():              # FROM ALL THE POTIONS I MANUALLY CREATED IN
             else:
                 break
         
+
+        
         if quant != 0:
             potions_to_mix.append(
                 {
