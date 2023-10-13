@@ -33,6 +33,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
         purchase_price = barrels_delivered[i].price
         ml_in_barrel = barrels_delivered[i].ml_per_barrel
         type = barrels_delivered[i].potion_type
+        quantity = barrels_delivered[i].quantity
         
         # FIND OUT COLOR OF BARREL
         colorml = None
@@ -51,12 +52,12 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
             result = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory"))
         gold = result.first()[0]
         
-        final_gold = gold - purchase_price
+        final_gold = gold - purchase_price * quantity
 
         with db.engine.begin() as connection:
             connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = " + str(final_gold)))
-            connection.execute(sqlalchemy.text("UPDATE ml SET " + colorml + " = " + colorml + " + " + str(ml_in_barrel)))
-            connection.execute(sqlalchemy.text("INSERT INTO barrel_orders (color, size, price) VALUES (" + colorml + ", " + str(ml_in_barrel) + " + " + str(purchase_price)))
+            connection.execute(sqlalchemy.text("UPDATE ml SET " + colorml + " = " + colorml + " + " + str(ml_in_barrel * quantity)))
+            connection.execute(sqlalchemy.text("INSERT INTO barrel_orders (color, size, price) VALUES ('" + colorml + "', " + str(ml_in_barrel) + " , " + str(purchase_price) + ")"))
 
 
     return "OK"

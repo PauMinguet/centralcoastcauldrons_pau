@@ -87,8 +87,8 @@ def get_bottle_plan():              # FROM ALL THE POTIONS I MANUALLY CREATED IN
             min_quantity = potions[i][6]
             break
     
-    if min_quantity > 3:
-        min_quantity = 3
+    if min_quantity > 10:
+        min_quantity = 10
 
     while potions != []:
         temp_ml = ml
@@ -118,9 +118,6 @@ def get_bottle_plan():              # FROM ALL THE POTIONS I MANUALLY CREATED IN
 
 
         potions = potions[1:]
-        
-
-
             
     
     return potions_to_mix
