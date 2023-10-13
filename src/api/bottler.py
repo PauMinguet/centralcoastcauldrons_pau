@@ -73,6 +73,7 @@ def get_bottle_plan():              # FROM ALL THE POTIONS I MANUALLY CREATED IN
         print(ml)
     
     if ml[0] < 100 or ml[1] < 100 or ml[2] < 100:
+        print("exited here")
         return []
 
 
@@ -80,17 +81,17 @@ def get_bottle_plan():              # FROM ALL THE POTIONS I MANUALLY CREATED IN
     print(potions)
 
     potions_to_mix = []
-
-
-    for i in range(len(potions)):
-        if potions[i][6] != potions[0][6]:
-            min_quantity = potions[i][6]
-            break
+    min_quantity = 5
     
-    if min_quantity > 10:
-        min_quantity = 10
 
     while potions != []:
+
+        for i in range(len(potions)):
+            if potions[i][6] != potions[0][6]:
+                min_quantity = potions[i][6]
+                print(min_quantity)
+                break
+
         temp_ml = ml
         r, g, b, d = potions[0][1], potions[0][2], potions[0][3], potions[0][4]
         quant = 0
@@ -103,9 +104,7 @@ def get_bottle_plan():              # FROM ALL THE POTIONS I MANUALLY CREATED IN
                 temp_ml[3] -= d
             else:
                 break
-        
 
-        
         if quant != 0:
             potions_to_mix.append(
                 {
@@ -117,7 +116,6 @@ def get_bottle_plan():              # FROM ALL THE POTIONS I MANUALLY CREATED IN
         ml[1] -= g * quant
         ml[2] -= b * quant
         ml[3] -= d * quant
-
 
         potions = potions[1:]
             
