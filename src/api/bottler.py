@@ -39,7 +39,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
         result = connection.execute(sqlalchemy.text("UPDATE ml SET redml = " + str(final_ml[0])))
         result = connection.execute(sqlalchemy.text("UPDATE ml SET greenml = " + str(final_ml[1])))
         result = connection.execute(sqlalchemy.text("UPDATE ml SET blueml = " + str(final_ml[2])))
-        result = connection.execute(sqlalchemy.text("UPDATE ml SET tranml = " + str(final_ml[3])))
+        result = connection.execute(sqlalchemy.text("UPDATE ml SET darkml = " + str(final_ml[3])))
 
 
     for pot in potions_delivered:
