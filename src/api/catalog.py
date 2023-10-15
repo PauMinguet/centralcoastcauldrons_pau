@@ -6,16 +6,12 @@ router = APIRouter()
 
 
 @router.get("/catalog/", tags=["catalog"])
-def get_catalog():
-    """
-    Each unique item combination must have only a single price.
-    """
-
-    # Can return a max of 20 items.
+def get_catalog():                              # START THINKING ABOUT CUSTOMER LIKES AND DISLIKES AND
+                                                # PRICE RANGE TO CUSTOMIZE CATALOG AND MAKE MORE $$$
 
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text("SELECT * FROM catalog WHERE quantity > 0"))
-    pots = result.fetchall()
+    pots = result.fetchall()[:19] # Can return a max of 20 items.
     print(pots)
 
     catalog = []

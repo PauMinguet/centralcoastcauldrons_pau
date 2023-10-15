@@ -62,6 +62,16 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
 
     return "OK"
 
+
+
+
+
+
+
+
+
+
+
 # Gets called once a day
 @router.post("/plan")
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
@@ -70,29 +80,11 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
     barrel_cart = []
 
-    rgbt = [0,0,0,0]
-    with db.engine.begin() as connection:
-        inventory = connection.execute(sqlalchemy.text("SELECT * FROM catalog")).fetchall()
-    print(inventory)
-
     with db.engine.begin() as connection:
         gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).first()[0]
+        ml = list(connection.execute(sqlalchemy.text("SELECT * FROM ml")).first()[1:])
 
-                        # for now just buy one small barrel (much better value than the tiny ones) of the color that we 
-                        # have the least either in potions or in ml, since bottler will make the max amount of every color potion
-
-
-    for item in (inventory):
-        rgbt[0] += item[1] * item[6]
-        rgbt[1] += item[2] * item[6]
-        rgbt[2] += item[3] * item[6]
-        rgbt[3] += item[4] * item[6]
-
-    with db.engine.begin() as connection:
-        ml = connection.execute(sqlalchemy.text("SELECT * FROM ml")).first()
-
-    for i in range(1, len(ml)-1):
-        rgbt[i] += ml[i+1]
+    
 
     barrel_order = [0,0,0]
     small_prices = [100, 120, 120]
@@ -103,21 +95,21 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         min_ml = 1000000
         min_col = 3
         for i in range(3):
-            if rgbt[i] < min_ml:
-                min_ml = rgbt[i]
+            if ml[i] < min_ml:
+                min_ml = ml[i]
                 min_col = i
         
         if min_col == 0:
             barrel_order[0] += 1
-            rgbt[0] += 500
+            ml[0] += 500
             gold -= small_prices[0]
         elif min_col == 1:
             barrel_order[1] += 1
-            rgbt[1] += 500
+            ml[1] += 500
             gold -= small_prices[1]
         elif min_col == 2:
             barrel_order[2] += 1
-            rgbt[2] += 500
+            ml[2] += 500
             gold -= small_prices[2]
 
 
