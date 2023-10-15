@@ -120,20 +120,14 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             rgbt[2] += 500
             gold -= small_prices[2]
 
-        #print(rgbt)
-        #print(least)
 
-
-    
     for i in range(len(barrel_order)):
         if barrel_order[i] != 0:
             barrel_cart.append({
         "sku": "SMALL_" + colors[i] + "_BARREL",
         "quantity": barrel_order[i],
     })
+            
+    print(barrel_cart)
     
-
-    
-    
-
     return barrel_cart

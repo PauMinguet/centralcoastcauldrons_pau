@@ -1,0 +1,56 @@
+
+    with db.engine.begin() as connection:
+        potions = connection.execute(sqlalchemy.text("SELECT * FROM catalog")).fetchall()
+        ml = list(connection.execute(sqlalchemy.text("SELECT * FROM ml")).fetchall()[0][1:])
+        print(ml)
+    
+    if ml[0] < 100 or ml[1] < 100 or ml[2] < 100:
+        print("exited here")
+        return []
+
+
+    potions = sorted(potions, key=itemgetter(6))
+    print(potions)
+
+    potions_to_mix = []
+    min_quantity = 5
+    
+
+    while potions != []:
+
+        for i in range(len(potions)):
+            if potions[i][6] != potions[0][6]:
+                if potions[i][6] > min_quantity:
+                    min_quantity = potions[i][6]
+                    print(min_quantity)
+                    break
+
+        temp_ml = ml
+        r, g, b, d = potions[0][1], potions[0][2], potions[0][3], potions[0][4]
+        quant = 0
+        while quant < min_quantity:
+            if temp_ml[0] >= r and temp_ml[1] >= g and temp_ml[2] >= b and temp_ml[3] >= d:
+                quant += 1
+                temp_ml[0] -= r
+                temp_ml[1] -= g
+                temp_ml[2] -= b
+                temp_ml[3] -= d
+            else:
+                break
+
+        if quant != 0:
+            potions_to_mix.append(
+                {
+                    "potion_type": [r, g, b, d],
+                    "quantity": quant,
+                })
+        
+        ml[0] -= r * quant
+        ml[1] -= g * quant
+        ml[2] -= b * quant
+        ml[3] -= d * quant
+
+        potions = potions[1:]
+            
+    
+    return potions_to_mix
