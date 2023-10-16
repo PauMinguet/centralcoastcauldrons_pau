@@ -36,16 +36,17 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
     final_ml = [ml[0] - ml_delivered[0], ml[1] - ml_delivered[1], ml[2] - ml_delivered[2], ml[3] - ml_delivered[3]]
 
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("UPDATE ml SET redml = " + str(final_ml[0])))
-        result = connection.execute(sqlalchemy.text("UPDATE ml SET greenml = " + str(final_ml[1])))
-        result = connection.execute(sqlalchemy.text("UPDATE ml SET blueml = " + str(final_ml[2])))
-        result = connection.execute(sqlalchemy.text("UPDATE ml SET darkml = " + str(final_ml[3])))
+        connection.execute(sqlalchemy.text("UPDATE ml SET redml = " + str(final_ml[0])))
+        connection.execute(sqlalchemy.text("UPDATE ml SET greenml = " + str(final_ml[1])))
+        connection.execute(sqlalchemy.text("UPDATE ml SET blueml = " + str(final_ml[2])))
+        connection.execute(sqlalchemy.text("UPDATE ml SET darkml = " + str(final_ml[3])))
 
 
     for pot in potions_delivered:
         color = "potion_" + str(pot.potion_type[0]) + "_" + str(pot.potion_type[1]) + "_" + str(pot.potion_type[2]) + "_" + str(pot.potion_type[3])
         with db.engine.begin() as connection:
             potion = connection.execute(sqlalchemy.text("SELECT * FROM catalog WHERE name= '" + color + "'")).first()
+            connection.execute(sqlalchemy.text("INSERT INTO potion_orders (name, quantity) VALUES (" + color +", " + str(pot.quantity) + ")"))
             #print(potion)
             #print("potion above")
         if potion != None:
@@ -54,6 +55,10 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
             final_num_potion = int(potion[6]) + int(pot.quantity)
             with db.engine.begin() as connection:
                 connection.execute(sqlalchemy.text("UPDATE catalog SET quantity = " + str(final_num_potion) + " WHERE name = '" + color +"'"))
+
+
+            
+    
 
     return "OK"
 
@@ -84,8 +89,7 @@ def get_bottle_plan():              # FROM ALL THE POTIONS I MANUALLY CREATED IN
             ml, potions, potions_to_mix = makePotion(ml, potions, potions_to_mix)
         else:
             potions = potions[1:]
-            
-    
+
     return potions_to_mix
 
 
