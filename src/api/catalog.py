@@ -11,7 +11,7 @@ def get_catalog():                              # START THINKING ABOUT CUSTOMER 
 
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text("SELECT * FROM catalog WHERE quantity > 0"))
-    pots = result.fetchall()[:6] # Can return a max of 20 items.
+    pots = result.fetchall()[:5] # Can return a max of 20 items.
     print(pots)
 
     catalog = []
