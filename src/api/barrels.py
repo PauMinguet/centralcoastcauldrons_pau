@@ -117,8 +117,10 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         if barrel_order[i] != 0:
             barrel_cart.append({
         "sku": "SMALL_" + colors[i] + "_BARREL",
-        "quantity": barrel_order[i],
+        "quantity": barrel_order[i] if barrel_order[i] < 10 else 10,
     })
+            
+    
             
     print(barrel_cart)
     
