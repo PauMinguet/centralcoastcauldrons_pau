@@ -24,7 +24,6 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
     """ """
     print(barrels_delivered)
     
-
     if len(barrels_delivered) == 0:
         return "Nothing Delivered"
     
@@ -57,7 +56,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
         with db.engine.begin() as connection:
             connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = " + str(final_gold)))
             connection.execute(sqlalchemy.text("UPDATE ml SET " + colorml + " = " + colorml + " + " + str(ml_in_barrel * quantity)))
-            connection.execute(sqlalchemy.text("INSERT INTO barrel_orders (color, size, price) VALUES ('" + colorml + "', " + str(ml_in_barrel) + " , " + str(purchase_price) + ")"))
+            connection.execute(sqlalchemy.text("INSERT INTO barrel_orders (color, size, price, quantity) VALUES ('" + colorml + "', " + str(ml_in_barrel) + " , " + str(purchase_price) + ", " + str(quantity) +")"))
 
 
     return "OK"
