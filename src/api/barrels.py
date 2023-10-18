@@ -75,53 +75,70 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
 # Gets called once a day
 @router.post("/plan")
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
-    """ """
-    print(wholesale_catalog)
-
-    barrel_cart = []
-
+    
     with db.engine.begin() as connection:
         gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).first()[0]
         ml = list(connection.execute(sqlalchemy.text("SELECT * FROM ml")).first()[1:])
 
+    print(ml)
+
+    wholesale_catalog = sorted(wholesale_catalog, key= lambda ele: ele.ml_per_barrel, reverse=True)
     
+    large_barrels, medium_barrels, small_barrels = [], [], []
+    for barrel in wholesale_catalog:
+        if barrel.ml_per_barrel == 10000:
+            large_barrels.append(barrel)
+        elif barrel.ml_per_barrel == 2500:
+            medium_barrels.append(barrel)
+        elif barrel.ml_per_barrel == 500:
+            small_barrels.append(barrel)
+    
+    '''print("LARGE BARRELS")
+    print(large_barrels)
+    print()
+    print("MEDIUM BARRELS")
+    print(medium_barrels)
+    print()
+    print("SMALL BARRELS")
+    print(small_barrels)
+    print()'''
 
-    barrel_order = [0,0,0]
-    small_prices = [100, 120, 120]
-    colors = ["RED", "GREEN", "BLUE"]
+    barrel_cart = []
 
-    while gold >= 120:
+    
+    all_barrels = [large_barrels, medium_barrels, small_barrels]
 
-        min_ml = 1000000
-        min_col = 3
-        for i in range(3):
-            if ml[i] < min_ml:
-                min_ml = ml[i]
-                min_col = i
-        
-        if min_col == 0:
-            barrel_order[0] += 1
-            ml[0] += 500
-            gold -= small_prices[0]
-        elif min_col == 1:
-            barrel_order[1] += 1
-            ml[1] += 500
-            gold -= small_prices[1]
-        elif min_col == 2:
-            barrel_order[2] += 1
-            ml[2] += 500
-            gold -= small_prices[2]
+    for i in range(3):
+        in_progress = all_barrels[i]
+        if in_progress == []:
+            continue
+        size_name = all_barrels[i][0].sku.split("_")[0]
+        ordered = [0,0,0,0]
+        prices = [i.price for i in in_progress]
+        colors = [i.sku.split("_")[1] for i in in_progress]
 
+        #print(prices)
+        #print(colors)
 
-    for i in range(len(barrel_order)):
-        if barrel_order[i] != 0:
-            barrel_cart.append({
-        "sku": "SMALL_" + colors[i] + "_BARREL",
-        "quantity": barrel_order[i] if barrel_order[i] < 10 else 10,
-    })
+        while gold > max(prices):
+            min_ml = ml[0]
+            min_col = 0
+            for i in range(1,len(colors)):
+                if ml[i] < min_ml:
+                    min_ml = ml[i]
+                    min_col = i
+
+            ordered[min_col] += 1
+            ml[min_col] += in_progress[0].ml_per_barrel
+            gold -= prices[min_col]
+                
+
+        for i in range(len(ordered)):
+            if ordered[i] != 0:
+                barrel_cart.append({
+            "sku": size_name + "_" + colors[i] + "_BARREL",
+            "quantity": ordered[i] if ordered[i] < 10 else 10,
+        })
             
-    
-            
-    print(barrel_cart)
-    
+    print(ml)
     return barrel_cart
