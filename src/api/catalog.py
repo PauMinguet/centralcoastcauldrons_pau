@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 import sqlalchemy
 from src import database as db
+from operator import itemgetter
 
 router = APIRouter()
 
@@ -12,7 +13,8 @@ def get_catalog():                              # START THINKING ABOUT CUSTOMER 
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text("SELECT * FROM catalog WHERE quantity > 0"))
     pots = result.fetchall()[:5] # Can return a max of 20 items.
-    print(pots)
+    
+    pots = sorted(pots, key=itemgetter(6))
 
     catalog = []
 
