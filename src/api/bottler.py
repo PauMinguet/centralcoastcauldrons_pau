@@ -28,18 +28,14 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
     
 
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT * FROM ml"))
-    ml = list(result.fetchall()[0])[1:]
+        ml = list(connection.execute(sqlalchemy.text("SELECT SUM(redml), SUM(greenml), SUM(blueml), SUM(darkml) FROM ml")).first())
 
     print(ml)
 
     final_ml = [ml[0] - ml_delivered[0], ml[1] - ml_delivered[1], ml[2] - ml_delivered[2], ml[3] - ml_delivered[3]]
 
     with db.engine.begin() as connection:
-        connection.execute(sqlalchemy.text("UPDATE ml SET redml = " + str(final_ml[0])))
-        connection.execute(sqlalchemy.text("UPDATE ml SET greenml = " + str(final_ml[1])))
-        connection.execute(sqlalchemy.text("UPDATE ml SET blueml = " + str(final_ml[2])))
-        connection.execute(sqlalchemy.text("UPDATE ml SET darkml = " + str(final_ml[3])))
+        connection.execute(sqlalchemy.text("INSERT INTO ml (redml, greenml, blueml, darkml) VALUES ("+str(final_ml[0])+", "+str(final_ml[1])+", "+str(final_ml[2])+", "+str(final_ml[3])+")"))
 
 
     for pot in potions_delivered:
@@ -76,7 +72,7 @@ def get_bottle_plan():              # FROM ALL THE POTIONS I MANUALLY CREATED IN
 
     with db.engine.begin() as connection:
         potions = connection.execute(sqlalchemy.text("SELECT * FROM catalog")).fetchall()
-        ml = list(connection.execute(sqlalchemy.text("SELECT * FROM ml")).fetchall()[0][1:])
+        ml = list(connection.execute(sqlalchemy.text("SELECT SUM(redml), SUM(greenml), SUM(blueml), SUM(darkml) FROM ml")).first())
         print(ml)
     
     for i in range(len(potions)):

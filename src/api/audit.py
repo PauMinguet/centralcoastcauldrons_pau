@@ -16,9 +16,9 @@ def get_inventory():                #   NOT UPDATED FOR 3 COLORS OR FOR NEW TABL
     """ """
 
     with db.engine.begin() as connection:
-        gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).first()[0]
+        gold = connection.execute(sqlalchemy.text("SELECT SUM(gold) FROM global_inventory")).first()[0]
         pots = connection.execute(sqlalchemy.text("SELECT * FROM catalog")).fetchall()
-        ml = connection.execute(sqlalchemy.text("SELECT * FROM ml")).first()[1:]
+        ml = list(connection.execute(sqlalchemy.text("SELECT SUM(redml), SUM(greenml), SUM(blueml), SUM(darkml) FROM ml")).first())
 
     num_pots = 0
     for pot in pots:

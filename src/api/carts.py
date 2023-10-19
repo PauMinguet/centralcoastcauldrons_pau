@@ -75,7 +75,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
         total_price, customer_id = connection.execute(sqlalchemy.text("SELECT price, customer_id  FROM carts WHERE id = " + str(cart_id))).first()
         print(total_price, customer_id)
         customer_name = connection.execute(sqlalchemy.text("SELECT name FROM customers WHERE id = " + str(customer_id))).first()[0]
-        connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold + " + str(total_price)))
+        connection.execute(sqlalchemy.text("INSERT INTO global_inventory (gold) VALUES (" + str(total_price) + ")"))
 
         potions_bought = connection.execute(sqlalchemy.text("SELECT * FROM cart_items WHERE cart_id = " + str(cart_id))).fetchall()
 

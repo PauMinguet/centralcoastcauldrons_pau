@@ -47,8 +47,8 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
 
 
         with db.engine.begin() as connection:
-            connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold - " + str(purchase_price * quantity)))
-            connection.execute(sqlalchemy.text("UPDATE ml SET " + colorml + " = " + colorml + " + " + str(ml_in_barrel * quantity)))
+            connection.execute(sqlalchemy.text("INSERT INTO global_inventory (gold) VALUES (-" + str(purchase_price * quantity) + ")"))
+            connection.execute(sqlalchemy.text("INSERT INTO ml (redml, greenml, blueml, darkml) VALUES ("+str(type[0] * ml_in_barrel * quantity)+", "+str(type[1] * ml_in_barrel * quantity)+", "+str(type[2] * ml_in_barrel * quantity)+", "+str(type[3] * ml_in_barrel * quantity)+")"))
             connection.execute(sqlalchemy.text("INSERT INTO barrel_orders (color, size, price, quantity) VALUES ('" + colorml + "', " + str(ml_in_barrel) + " , " + str(purchase_price) + ", " + str(quantity) +")"))
 
 
@@ -69,8 +69,8 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     
     with db.engine.begin() as connection:
-        gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).first()[0]
-        ml = list(connection.execute(sqlalchemy.text("SELECT * FROM ml")).first()[1:])
+        gold = connection.execute(sqlalchemy.text("SELECT SUM(gold) FROM global_inventory")).first()[0]
+        ml = list(connection.execute(sqlalchemy.text("SELECT SUM(redml), SUM(greenml), SUM(blueml), SUM(darkml) FROM ml")).first())
 
     print(ml)
 
