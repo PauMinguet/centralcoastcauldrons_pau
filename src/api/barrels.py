@@ -47,9 +47,9 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
 
 
         with db.engine.begin() as connection:
-            connection.execute(sqlalchemy.text("INSERT INTO global_inventory (gold) VALUES (-" + str(purchase_price * quantity) + ")"))
-            connection.execute(sqlalchemy.text("INSERT INTO ml (redml, greenml, blueml, darkml) VALUES ("+str(type[0] * ml_in_barrel * quantity)+", "+str(type[1] * ml_in_barrel * quantity)+", "+str(type[2] * ml_in_barrel * quantity)+", "+str(type[3] * ml_in_barrel * quantity)+")"))
-            connection.execute(sqlalchemy.text("INSERT INTO barrel_orders (color, size, price, quantity) VALUES ('" + colorml + "', " + str(ml_in_barrel) + " , " + str(purchase_price) + ", " + str(quantity) +")"))
+            purchase_id = connection.execute(sqlalchemy.text("INSERT INTO barrel_orders (color, size, price, quantity) VALUES ('" + colorml + "', " + str(ml_in_barrel) + " , " + str(purchase_price) + ", " + str(quantity) +") RETURNING id")).first()[0]
+            connection.execute(sqlalchemy.text("INSERT INTO gold (quantity, description) VALUES (-" + str(purchase_price * quantity) + ", 'Bought barrels with purchase_id = "+str(purchase_id)+"')"))
+            connection.execute(sqlalchemy.text("INSERT INTO inventory (r, g, b, d) VALUES ("+str(type[0] * ml_in_barrel * quantity)+", "+str(type[1] * ml_in_barrel * quantity)+", "+str(type[2] * ml_in_barrel * quantity)+", "+str(type[3] * ml_in_barrel * quantity)+")"))
 
 
     return "OK"
@@ -69,10 +69,11 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     
     with db.engine.begin() as connection:
-        gold = connection.execute(sqlalchemy.text("SELECT SUM(gold) FROM global_inventory")).first()[0]
-        ml = list(connection.execute(sqlalchemy.text("SELECT SUM(redml), SUM(greenml), SUM(blueml), SUM(darkml) FROM ml")).first())
+        gold = connection.execute(sqlalchemy.text("SELECT SUM(quantity) FROM gold")).first()[0]
+        ml = list(connection.execute(sqlalchemy.text("SELECT SUM(r), SUM(g), SUM(b), SUM(d) FROM inventory")).first())
 
     print(ml)
+    print("asdfasdf")
 
     wholesale_catalog = sorted(wholesale_catalog, key= lambda ele: ele.ml_per_barrel, reverse=True)
     
@@ -85,16 +86,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         elif barrel.ml_per_barrel == 500:
             small_barrels.append(barrel)
     
-    '''print("LARGE BARRELS")
-    print(large_barrels)
-    print()
-    print("MEDIUM BARRELS")
-    print(medium_barrels)
-    print()
-    print("SMALL BARRELS")
-    print(small_barrels)
-    print()'''
-
     barrel_cart = []
 
     
@@ -112,7 +103,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         #print(prices)
         #print(colors)
 
-        while gold > max(prices):
+        while gold >= max(prices):
             min_ml = ml[0]
             min_col = 0
             for i in range(1,len(colors)):

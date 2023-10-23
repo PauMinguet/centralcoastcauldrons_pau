@@ -52,14 +52,7 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
 
     with db.engine.begin() as connection:
         price = connection.execute(sqlalchemy.text("SELECT price FROM catalog WHERE name = '" + item_sku + "'")).first()[0]
-        print(price)
-        cur_price = connection.execute(sqlalchemy.text("SELECT price FROM carts WHERE id = " + str(cart_id))).fetchone()[0]
-
-        fin_price = cur_price + price * cart_item.quantity
-
-        connection.execute(sqlalchemy.text("UPDATE carts SET price = " + str(fin_price) + " WHERE id = " + str(cart_id)))
         connection.execute(sqlalchemy.text("INSERT INTO cart_items (cart_id, r, g, b, t, sku, quantity, price) VALUES ("+str(cart_id)+", "+r+", "+g+", "+b+", "+t+", '"+item_sku+"', "+str(cart_item.quantity)+", " +str(price)+") RETURNING id")).first()[0]
-
     return "OK"
 
 
@@ -72,10 +65,11 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
 
     with db.engine.begin() as connection:               # UPDATE GOLD 
 
-        total_price, customer_id = connection.execute(sqlalchemy.text("SELECT price, customer_id  FROM carts WHERE id = " + str(cart_id))).first()
-        print(total_price, customer_id)
+        customer_id = connection.execute(sqlalchemy.text("SELECT customer_id  FROM carts WHERE id = " + str(cart_id))).first()[0]
+        total_price = connection.execute(sqlalchemy.text("SELECT SUM(price * quantity)  FROM cart_items WHERE cart_id = " + str(cart_id))).first()[0]
+
         customer_name = connection.execute(sqlalchemy.text("SELECT name FROM customers WHERE id = " + str(customer_id))).first()[0]
-        connection.execute(sqlalchemy.text("INSERT INTO global_inventory (gold) VALUES (" + str(total_price) + ")"))
+        connection.execute(sqlalchemy.text("INSERT INTO gold (quantity, description) VALUES (" + str(total_price) + ", 'Cart checkout customer_id = "+str(customer_id)+"')"))
 
         potions_bought = connection.execute(sqlalchemy.text("SELECT * FROM cart_items WHERE cart_id = " + str(cart_id))).fetchall()
 
@@ -85,7 +79,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
         total_potions_bought += pot[7]
 
         with db.engine.begin() as connection:
-            connection.execute(sqlalchemy.text("UPDATE catalog SET quantity = quantity - " + str(pot[7]) + " WHERE name = '" + pot[6] + "'"))
+            connection.execute(sqlalchemy.text("INSERT INTO catalog (r,g,b,t,price,quantity,name) VALUES ("+pot[1]+", "+pot[2]+", "+pot[3]+", "+pot[4]+", "+pot[6]+", "+pot[7]+", "+pot[8]+")"))
             params = {
     'customer_id': customer_id,
     'customer_name': customer_name,

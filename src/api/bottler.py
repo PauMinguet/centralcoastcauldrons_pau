@@ -26,23 +26,15 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
     
     print(ml_delivered)
     
-
     with db.engine.begin() as connection:
-        ml = list(connection.execute(sqlalchemy.text("SELECT SUM(redml), SUM(greenml), SUM(blueml), SUM(darkml) FROM ml")).first())
-
-    print(ml)
-
-    final_ml = [ml[0] - ml_delivered[0], ml[1] - ml_delivered[1], ml[2] - ml_delivered[2], ml[3] - ml_delivered[3]]
-
-    with db.engine.begin() as connection:
-        connection.execute(sqlalchemy.text("INSERT INTO ml (redml, greenml, blueml, darkml) VALUES ("+str(final_ml[0])+", "+str(final_ml[1])+", "+str(final_ml[2])+", "+str(final_ml[3])+")"))
+        connection.execute(sqlalchemy.text("INSERT INTO inventory (r, g, b, d) VALUES (-"+str(ml_delivered[0])+", -"+str(ml_delivered[1])+", -"+str(ml_delivered[2])+", -"+str(ml_delivered[1])+")"))
 
 
     for pot in potions_delivered:
         color = "potion_" + str(pot.potion_type[0]) + "_" + str(pot.potion_type[1]) + "_" + str(pot.potion_type[2]) + "_" + str(pot.potion_type[3])
         with db.engine.begin() as connection:
             potion = connection.execute(sqlalchemy.text("SELECT * FROM catalog WHERE name= '" + color + "'")).first()
-            connection.execute(sqlalchemy.text("INSERT INTO potion_orders (name, quantity) VALUES (" + color +", " + str(pot.quantity) + ")"))
+            connection.execute(sqlalchemy.text("INSERT INTO potion_orders (name, quantity) VALUES ('" + color +"', " + str(pot.quantity) + ")"))
             #print(potion)
             #print("potion above")
         if potion != None:
@@ -72,7 +64,7 @@ def get_bottle_plan():              # FROM ALL THE POTIONS I MANUALLY CREATED IN
 
     with db.engine.begin() as connection:
         potions = connection.execute(sqlalchemy.text("SELECT * FROM catalog")).fetchall()
-        ml = list(connection.execute(sqlalchemy.text("SELECT SUM(redml), SUM(greenml), SUM(blueml), SUM(darkml) FROM ml")).first())
+        ml = list(connection.execute(sqlalchemy.text("SELECT SUM(r), SUM(g), SUM(b), SUM(d) FROM inventory")).first())
         print(ml)
     
     for i in range(len(potions)):
