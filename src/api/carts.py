@@ -73,25 +73,25 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
 
         potions_bought = connection.execute(sqlalchemy.text("SELECT * FROM cart_items WHERE cart_id = " + str(cart_id))).fetchall()
 
-    total_potions_bought = 0
-    for pot in potions_bought:
-        print("Pot: " + str(pot))
-        total_potions_bought += pot[7]
-
-        with db.engine.begin() as connection:
-            connection.execute(sqlalchemy.text("INSERT INTO catalog (r,g,b,t,price,quantity,name) VALUES ("+pot[1]+", "+pot[2]+", "+pot[3]+", "+pot[4]+", "+pot[6]+", "+pot[7]+", "+pot[8]+")"))
-            params = {
-    'customer_id': customer_id,
-    'customer_name': customer_name,
-    'item_name': pot[6],
-    'price': pot[8],
-    'quantity': pot[7]
-}
-            connection.execute(sqlalchemy.text("INSERT INTO invoices (customer_id, customer_name, item_name, price, quantity, created_at) VALUES (:customer_id, :customer_name, :item_name, :price, :quantity, NOW())"), params)
-
-            connection.execute(sqlalchemy.text("DELETE FROM cart_items WHERE sku = '" + str(pot[6]) + "'"))
-            
     
+    with db.engine.begin() as connection:
+        total_potions_bought = 0
+        for pot in potions_bought:
+            print("Pot: " + str(pot))
+            total_potions_bought += pot[7]
+
+            connection.execute(sqlalchemy.text("INSERT INTO catalog (r,g,b,d,price,quantity,name) VALUES ("+str(pot[1])+", "+str(pot[2])+", "+str(pot[3])+", "+str(pot[4])+", "+str(pot[8])+", -"+str(pot[7])+", '"+str(pot[6])+"')"))
+            params = {
+        'customer_id': customer_id,
+        'customer_name': customer_name,
+        'item_name': pot[6],
+        'price': pot[8],
+        'quantity': pot[7]
+    }
+            connection.execute(sqlalchemy.text("INSERT INTO invoices (customer_id, customer_name, item_name, price, quantity, created_at) VALUES (:customer_id, :customer_name, :item_name, :price, :quantity, NOW())"), params)
+            connection.execute(sqlalchemy.text("DELETE FROM cart_items WHERE sku = '" + str(pot[6]) + "'"))
+                
+        
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text("DELETE FROM carts WHERE id = " + str(cart_id) + ""))
         

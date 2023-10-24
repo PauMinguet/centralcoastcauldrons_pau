@@ -11,22 +11,31 @@ def get_catalog():                              # START THINKING ABOUT CUSTOMER 
                                                 # PRICE RANGE TO CUSTOMIZE CATALOG AND MAKE MORE $$$
 
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT * FROM catalog WHERE quantity > 0"))
+        result = connection.execute(sqlalchemy.text("""
+            SELECT c.name, s.total_quantity AS quantity, c.price, c.r, c.g, c.b, c.d
+            FROM catalog c
+            INNER JOIN (
+                SELECT name, SUM(quantity) AS total_quantity
+                FROM catalog
+                GROUP BY name
+            ) s ON c.name = s.name
+            ORDER BY s.total_quantity DESC                  
+            """))
+        
     pots = result.fetchall()[:5] # Can return a max of 20 items.
-    
-    pots = sorted(pots, key=itemgetter(6))
 
+    print(pots)
     catalog = []
 
     for pot in pots:
-        color = "potion_" + str(pot[1]) + "_" + str(pot[2]) + "_" + str(pot[3]) + "_" + str(pot[4])
-        catalog.append(
+        #if pot[1] != 0:
+            catalog.append(
             {
-                "sku": color,
-                "name": color,
-                "quantity": str(pot[6]),
-                "price": str(pot[5]),
-                "potion_type": [pot[1], pot[2], pot[3], pot[4]],
+                "sku": pot[0],
+                "name": pot[0],
+                "quantity": str(pot[1]),
+                "price": str(pot[2]),
+                "potion_type": [pot[3], pot[4], pot[5], pot[6]],
             }
         )
 

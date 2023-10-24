@@ -22,31 +22,22 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
     ml_delivered = [0,0,0,0]
     for pot in potions_delivered:
         for i in range(4):
-            ml_delivered[i] += pot.potion_type[i] * pot.quantity
-    
+            ml_delivered[i] += pot.potion_type[i] * pot.quantity    
     print(ml_delivered)
-    
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text("INSERT INTO inventory (r, g, b, d) VALUES (-"+str(ml_delivered[0])+", -"+str(ml_delivered[1])+", -"+str(ml_delivered[2])+", -"+str(ml_delivered[1])+")"))
 
 
-    for pot in potions_delivered:
-        color = "potion_" + str(pot.potion_type[0]) + "_" + str(pot.potion_type[1]) + "_" + str(pot.potion_type[2]) + "_" + str(pot.potion_type[3])
-        with db.engine.begin() as connection:
-            potion = connection.execute(sqlalchemy.text("SELECT * FROM catalog WHERE name= '" + color + "'")).first()
+    with db.engine.begin() as connection:
+        for pot in potions_delivered:
+            color = "potion_" + str(pot.potion_type[0]) + "_" + str(pot.potion_type[1]) + "_" + str(pot.potion_type[2]) + "_" + str(pot.potion_type[3])
+            potion_sample = connection.execute(sqlalchemy.text("SELECT * FROM catalog WHERE name = '" + color + "'")).first()
+
+            print(potion_sample)
+
             connection.execute(sqlalchemy.text("INSERT INTO potion_orders (name, quantity) VALUES ('" + color +"', " + str(pot.quantity) + ")"))
-            #print(potion)
-            #print("potion above")
-        if potion != None:
-            #print(potion[6])
-            #print(pot.quantity)
-            final_num_potion = int(potion[6]) + int(pot.quantity)
-            with db.engine.begin() as connection:
-                connection.execute(sqlalchemy.text("UPDATE catalog SET quantity = " + str(final_num_potion) + " WHERE name = '" + color +"'"))
 
-
-            
-    
+            connection.execute(sqlalchemy.text("INSERT INTO catalog (r, g, b, d, price, quantity, name) VALUES (" + str(pot.potion_type[0]) + "," + str(pot.potion_type[1]) + "," + str(pot.potion_type[2]) + "," + str(pot.potion_type[3]) + ", " + str(potion_sample[5]) + ", " + str(pot.quantity) + ", '" + color + "')"))
 
     return "OK"
 
