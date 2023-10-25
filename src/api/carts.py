@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from src.api import auth
 import sqlalchemy
 from src import database as db
+from enum import Enum
 
 router = APIRouter(
     prefix="/carts",
@@ -32,69 +33,52 @@ def search_orders(
     sort_col: search_sort_options = search_sort_options.timestamp,
     sort_order: search_sort_order = search_sort_order.desc,
 ):
-    """
-    Search for cart line items by customer name and/or potion sku.
-
-    Customer name and potion sku filter to orders that contain the 
-    string (case insensitive). If the filters aren't provided, no
-    filtering occurs on the respective search term.
-
-    Search page is a cursor for pagination. The response to this
-    search endpoint will return previous or next if there is a
-    previous or next page of results available. The token passed
-    in that search response can be passed in the next search request
-    as search page to get that page of results.
-
-    Sort col is which column to sort by and sort order is the direction
-    of the search. They default to searching by timestamp of the order
-    in descending order.
-
-    The response itself contains a previous and next page token (if
-    such pages exist) and the results as an array of line items. Each
-    line item contains the line item id (must be unique), item sku, 
-    customer name, line item total (in gold), and timestamp of the order.
-    Your results must be paginated, the max results you can return at any
-    time is 5 total line items.
-    """
-
     with db.engine.begin() as connection:
         params = {
-            customer_name_filter: '',
-            potion_sku_filter: '',
-            sort_col: sort_col,
-            sort_order: sort_order
+            'customer_name_filter': customer_name,
+            'potion_sku_filter': potion_sku
         }
-        
-        if customer_name != '':
-            customer_name_filter = 'WHERE customer_name = ' + customer_name
-        if potion_sku != '':
-            potion_sku_filter = 'WHERE potion_sku = ' + potion_sku
-        if sort_col != '':
-            sort_col_filter = 'ORDER BY ' + sort_col
 
-        connection.execute(sqlalchemy.text("""
-        SELECT created_at AS timestamp, customer_name, item_sku, quantity * price AS line_item_total FROM invoices
-        :customer_name_filter
-        :potion_sku_filter
-        ORDER BY :sort_col
-        
-        """, params))
+        query = """
+        SELECT created_at AS timestamp, customer_name, item_sku, quantity * price AS line_item_total 
+        FROM invoices
+        """
 
+        # Build the SQL query based on parameters
 
+        if customer_name and potion_sku:
+            query += "WHERE customer_name = :customer_name_filter AND item_sku = :potion_sku_filter "
+        else:
+            if customer_name:
+                query += "WHERE customer_name = :customer_name_filter "
+            if potion_sku:
+                query += "WHERE item_sku = :potion_sku_filter "
+            
+        order_by_clause = f"ORDER BY {sort_col.value} {sort_order.value.upper()}"
 
-    return {
-        "previous": "",
-        "next": "",
-        "results": [
-            {
-                "line_item_id": 1,
-                "item_sku": "1 oblivion potion",
-                "customer_name": "Scaramouche",
-                "line_item_total": 50,
-                "timestamp": "2021-01-01T00:00:00Z",
-            }
-        ],
+        query += order_by_clause
+
+        result = connection.execute(sqlalchemy.text(query), params).fetchall()
+
+    print(result)
+
+    search = {
+        "previous": 'str(int(search_page)-1)',
+        "next": 'str(int(search_page)+1)',
+        "results": [],
     }
+
+    for i in range(len(result)):
+        search[i] = {
+                "line_item_id": i,
+                "item_sku": result[2],
+                "customer_name": result[1],
+                "line_item_total": result[3],
+                "timestamp": result[0],
+            }
+
+
+    return search
 
 
 
