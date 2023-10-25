@@ -12,7 +12,7 @@ def get_catalog():                              # START THINKING ABOUT CUSTOMER 
 
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text("""
-            SELECT c.name, s.total_quantity AS quantity, c.price, c.r, c.g, c.b, c.d
+            SELECT DISTINCT c.name, s.total_quantity AS quantity, c.price, c.r, c.g, c.b, c.d
             FROM catalog c
             INNER JOIN (
                 SELECT name, SUM(quantity) AS total_quantity
@@ -22,7 +22,7 @@ def get_catalog():                              # START THINKING ABOUT CUSTOMER 
             ORDER BY s.total_quantity DESC                  
             """))
         
-    pots = result.fetchall()[:5] # Can return a max of 20 items.
+    pots = result.fetchall()[:6] # Can return a max of 20 items.
 
     print(pots)
     catalog = []
