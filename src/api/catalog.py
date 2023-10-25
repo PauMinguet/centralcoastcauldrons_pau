@@ -33,8 +33,8 @@ def get_catalog():                              # START THINKING ABOUT CUSTOMER 
             {
                 "sku": pot[0],
                 "name": pot[0],
-                "quantity": str(pot[1]),
-                "price": str(pot[2]),
+                "quantity": pot[1],
+                "price": pot[2],
                 "potion_type": [pot[3], pot[4], pot[5], pot[6]],
             }
         )
