@@ -45,12 +45,12 @@ def search_orders(
         """
 
         if customer_name and potion_sku:
-            query += "WHERE customer_name = :customer_name_filter AND item_sku = :potion_sku_filter "
+            query += "WHERE customer_name LIKE :customer_name_filter AND item_sku LIKE :potion_sku_filter "
         else:
             if customer_name:
-                query += "WHERE customer_name = :customer_name_filter "
+                query += "WHERE customer_name LIKE :customer_name_filter "
             if potion_sku:
-                query += "WHERE item_sku = :potion_sku_filter "
+                query += "WHERE item_sku LIKE :potion_sku_filter "
             
         order_by_clause = f"ORDER BY {sort_col.value} {sort_order.value.upper()}"
 
@@ -60,7 +60,10 @@ def search_orders(
             search_page = '0'
 
 
-        result = connection.execute(sqlalchemy.text(query), params).fetchall()[5*int(search_page):5*int(search_page)+5]
+        start = 5*int(search_page)
+        end = 5*int(search_page)+5
+
+        result = connection.execute(sqlalchemy.text(query), params).fetchall()[start:end]
 
     prev = str(int(search_page)-1)
     next = str(int(search_page)+1)
@@ -68,8 +71,8 @@ def search_orders(
     print(result)
 
     search = {
-        "previous": prev if int(prev) > -1 else search_page,
-        "next": next,
+        "previous": prev if int(prev) > -1 else '',
+        "next": next if int(next) < len(result) else '',
         "results": [],
     }
 
