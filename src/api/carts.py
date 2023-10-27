@@ -56,6 +56,9 @@ def search_orders(
 
         query += order_by_clause
 
+        if search_page == '':
+            search_page = '0'
+
 
         result = connection.execute(sqlalchemy.text(query), params).fetchall()[5*int(search_page):5*int(search_page)+5]
 
@@ -79,7 +82,6 @@ def search_orders(
                 "line_item_total": result[i][3],
                 "timestamp": result[i][0],
             })
-
 
     return search
 
