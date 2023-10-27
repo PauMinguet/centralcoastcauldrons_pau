@@ -44,8 +44,6 @@ def search_orders(
         FROM invoices
         """
 
-        # Build the SQL query based on parameters
-
         if customer_name and potion_sku:
             query += "WHERE customer_name = :customer_name_filter AND item_sku = :potion_sku_filter "
         else:
@@ -58,24 +56,29 @@ def search_orders(
 
         query += order_by_clause
 
-        result = connection.execute(sqlalchemy.text(query), params).fetchall()
+
+        result = connection.execute(sqlalchemy.text(query), params).fetchall()[5*int(search_page):5*int(search_page)+5]
+
+    prev = str(int(search_page)-1)
+    next = str(int(search_page)+1)
 
     print(result)
 
     search = {
-        "previous": 'str(int(search_page)-1)',
-        "next": 'str(int(search_page)+1)',
+        "previous": prev if int(prev) > -1 else search_page,
+        "next": next,
         "results": [],
     }
 
     for i in range(len(result)):
-        search[i] = {
+        
+        search['results'].append({
                 "line_item_id": i,
-                "item_sku": result[2],
-                "customer_name": result[1],
-                "line_item_total": result[3],
-                "timestamp": result[0],
-            }
+                "item_sku": result[i][2],
+                "customer_name": result[i][1],
+                "line_item_total": result[i][3],
+                "timestamp": result[i][0],
+            })
 
 
     return search
