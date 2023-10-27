@@ -40,20 +40,24 @@ def search_orders(
         }
 
         query = """
-        SELECT created_at AS timestamp, customer_name, item_sku, quantity * price AS line_item_total 
-        FROM invoices
-        """
+    SELECT created_at AS timestamp, customer_name, item_sku, quantity * price AS line_item_total 
+    FROM invoices
+"""
+
+        params = {}
 
         if customer_name and potion_sku:
             query += "WHERE customer_name LIKE :customer_name_filter AND item_sku LIKE :potion_sku_filter "
-        else:
-            if customer_name:
-                query += "WHERE customer_name LIKE :customer_name_filter "
-            if potion_sku:
-                query += "WHERE item_sku LIKE :potion_sku_filter "
-            
-        order_by_clause = f"ORDER BY {sort_col.value} {sort_order.value.upper()}"
+            params['customer_name_filter'] = f"%{customer_name}%"
+            params['potion_sku_filter'] = f"%{potion_sku}%"
+        elif customer_name:
+            query += "WHERE customer_name LIKE :customer_name_filter "
+            params['customer_name_filter'] = f"%{customer_name}%"
+        elif potion_sku:
+            query += "WHERE item_sku LIKE :potion_sku_filter "
+            params['potion_sku_filter'] = f"%{potion_sku}%"
 
+        order_by_clause = f"ORDER BY {sort_col.value} {sort_order.value.upper()}"
         query += order_by_clause
 
         if search_page == '':

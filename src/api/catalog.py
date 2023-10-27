@@ -28,7 +28,7 @@ def get_catalog():                              # START THINKING ABOUT CUSTOMER 
     catalog = []
 
     for pot in pots:
-        #if pot[1] != 0:
+        if pot[1] != 0:
             catalog.append(
             {
                 "sku": pot[0],
