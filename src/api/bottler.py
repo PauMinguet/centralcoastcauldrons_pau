@@ -25,7 +25,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
             ml_delivered[i] += pot.potion_type[i] * pot.quantity    
     print(ml_delivered)
     with db.engine.begin() as connection:
-        connection.execute(sqlalchemy.text("INSERT INTO inventory (r, g, b, d) VALUES (-"+str(ml_delivered[0])+", -"+str(ml_delivered[1])+", -"+str(ml_delivered[2])+", -"+str(ml_delivered[4])+")"))
+        connection.execute(sqlalchemy.text("INSERT INTO inventory (r, g, b, d) VALUES (-"+str(ml_delivered[0])+", -"+str(ml_delivered[1])+", -"+str(ml_delivered[2])+", -"+str(ml_delivered[3])+")"))
 
 
     with db.engine.begin() as connection:
