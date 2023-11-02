@@ -73,8 +73,6 @@ def search_orders(
     prev = str(int(search_page)-1)
     next = str(int(search_page)+1)
 
-    print(result)
-
     search = {
         "previous": prev if int(prev) > -1 else '',
         "next": next if num < 6 else '',
