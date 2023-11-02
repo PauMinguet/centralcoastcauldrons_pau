@@ -75,7 +75,7 @@ def search_orders(
 
     search = {
         "previous": prev if int(prev) > -1 else '',
-        "next": next if num-(5*(int(prev)+1)) < len(result)  else '',
+        "next": next if num-start > 5  else '',
         "results": [],
     }
 
