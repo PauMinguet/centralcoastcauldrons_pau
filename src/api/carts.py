@@ -63,11 +63,12 @@ def search_orders(
         if search_page == '':
             search_page = '0'
 
+        result = connection.execute(sqlalchemy.text(query), params).fetchall()
 
+        num = len(result)
         start = 5*int(search_page)
         end = 5*int(search_page)+5
-
-        result = connection.execute(sqlalchemy.text(query), params).fetchall()[start:end]
+        result = result[start:end]
 
     prev = str(int(search_page)-1)
     next = str(int(search_page)+1)
@@ -76,7 +77,7 @@ def search_orders(
 
     search = {
         "previous": prev if int(prev) > -1 else '',
-        "next": next if int(next) > len(result) else '',
+        "next": next if num < 6 else '',
         "results": [],
     }
 
