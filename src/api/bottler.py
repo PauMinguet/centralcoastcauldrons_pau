@@ -50,22 +50,25 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
 @router.post("/plan")
 def get_bottle_plan():              # FROM ALL THE POTIONS I MANUALLY CREATED IN CATALOG, MAKE
                                     # IT SO THAT QUANTITY IS ALWAYS THE SAME FOR ALL
-
     potions_to_mix = []
 
     with db.engine.begin() as connection:
-        potions = connection.execute(sqlalchemy.text("SELECT * FROM catalog")).fetchall()
+        num_potions = connection.execute(sqlalchemy.text("SELECT SUM(quantity) FROM catalog")).scalar_one()
+        potions = connection.execute(sqlalchemy.text("SELECT r,g,b,d,price,SUM(quantity),name FROM catalog GROUP BY r, g, b, d, price, name")).fetchall()
         ml = list(connection.execute(sqlalchemy.text("SELECT SUM(r), SUM(g), SUM(b), SUM(d) FROM inventory")).first())
         print(ml)
+        print(potions)
     
     for i in range(len(potions)):
         potions[i] = list(potions[i])
     
     while potions != []:
-        potions = sorted(potions, key=itemgetter(6))
-        print(potions)
+        if num_potions > 299:
+            break
+        potions = sorted(potions, key=itemgetter(5))
         if canMake(ml, potions[0]):
             ml, potions, potions_to_mix = makePotion(ml, potions, potions_to_mix)
+            num_potions += 1
         else:
             potions = potions[1:]
 
@@ -73,19 +76,19 @@ def get_bottle_plan():              # FROM ALL THE POTIONS I MANUALLY CREATED IN
 
 
 def canMake(ml, pot):
-    if ml[0] >= pot[1] and ml[1] >= pot[2] and ml[2] >= pot[3] and ml[3] >= pot[4]:
+    if ml[0] >= pot[0] and ml[1] >= pot[1] and ml[2] >= pot[2] and ml[3] >= pot[3]:
         return True
     return False
 
 def makePotion(ml, potions, potions_to_mix):
     pot = potions[0]
     #print(pot)
-    ml[0] -= pot[1]
-    ml[1] -= pot[2]
-    ml[2] -= pot[3]
-    ml[3] -= pot[4]
+    ml[0] -= pot[0]
+    ml[1] -= pot[1]
+    ml[2] -= pot[2]
+    ml[3] -= pot[3]
 
-    pot_type = [pot[1], pot[2], pot[3], pot[4]]
+    pot_type = [pot[0], pot[1], pot[2], pot[3]]
 
     done = False
 
@@ -101,6 +104,6 @@ def makePotion(ml, potions, potions_to_mix):
                     "quantity": 1,
                 })
 
-    potions[0][6] += 1
+    potions[0][5] += 1
 
     return ml, potions, potions_to_mix
