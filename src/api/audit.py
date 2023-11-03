@@ -17,12 +17,8 @@ def get_inventory():                #   NOT UPDATED FOR 3 COLORS OR FOR NEW TABL
 
     with db.engine.begin() as connection:
         gold = connection.execute(sqlalchemy.text("SELECT SUM(quantity) FROM gold")).first()[0]
-        pots = connection.execute(sqlalchemy.text("SELECT * FROM catalog")).fetchall()
+        num_pots = connection.execute(sqlalchemy.text("SELECT SUM(quantity) FROM catalog")).scalar_one()
         ml = list(connection.execute(sqlalchemy.text("SELECT SUM(r), SUM(g), SUM(b), SUM(d) FROM inventory")).first())
-
-    num_pots = 0
-    for pot in pots:
-        num_pots += pot[6]
     
     num_ml = 0
     for m in ml:
