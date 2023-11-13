@@ -63,7 +63,7 @@ def get_bottle_plan():              # FROM ALL THE POTIONS I MANUALLY CREATED IN
         potions[i] = list(potions[i])
     
     while potions != []:
-        if num_potions > 299:
+        if num_potions > 290:
             break
         potions = sorted(potions, key=itemgetter(5))
         if canMake(ml, potions[0]):
