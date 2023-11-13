@@ -54,6 +54,7 @@ def get_bottle_plan():              # FROM ALL THE POTIONS I MANUALLY CREATED IN
 
     with db.engine.begin() as connection:
         num_potions = connection.execute(sqlalchemy.text("SELECT SUM(quantity) FROM catalog")).scalar_one()
+        wishlist = connection.execute(sqlalchemy.text("SELECT name, quantity FROM wishlist")).fetchall()
         potions = connection.execute(sqlalchemy.text("SELECT r,g,b,d,price,SUM(quantity),name FROM catalog GROUP BY r, g, b, d, price, name")).fetchall()
         ml = list(connection.execute(sqlalchemy.text("SELECT SUM(r), SUM(g), SUM(b), SUM(d) FROM inventory")).first())
         print(ml)
